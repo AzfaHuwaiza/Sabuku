@@ -1,0 +1,153 @@
+{% load static %}
+
+<nav class="bg-white shadow-md sticky w-full top-0 z-10">
+  <div class="container mx-auto px-6 py-3">
+    <div class="flex justify-between items-center">
+      <a href="{% url 'home' %}" class="flex items-center space-x-3">
+        <img src="{% static 'images/hmsi.png' %}" alt="Logo HMSI" class="w-12 h-auto" />
+        <div>
+          <p class="text-xl font-bold text-dark-text">Sabuku</p>
+          <p class="text-xs text-light-text">Satu Bulan, Satu Buku. HMSI</p>
+        </div>
+      </a>
+
+      <div class="hidden md:flex items-center space-x-6">
+        <a href="{% url 'home' %}" class="text-dark-text font-medium hover:text-primary-blue transition">Beranda</a>
+        <a href="{% url 'galeri_review' %}" class="text-dark-text font-medium hover:text-primary-blue transition">Galeri Review</a>
+        <a href="{% url 'submit_review' %}" class="text-dark-text font-medium hover:text-primary-blue transition">Submit Review</a>
+        {% if user.is_authenticated %}
+        <div class="border-l h-6 border-gray-300"></div>
+        <div class="relative">
+          <!-- Trigger button -->
+          <button id="userMenuBtn" class="flex items-center space-x-2 text-dark-text hover:text-primary-blue transition">
+            <span class="text-sm font-medium"> {% with user.get_full_name|default:user.username as nama %} {{ nama|slice:":15" }}{% if nama|length > 15 %}...{% endif %} {% endwith %} </span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
+            </svg>
+          </button>
+
+          <!-- Dropdown menu -->
+          <div id="userMenu" class="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg hidden z-50">
+            {% if user.is_superuser %}
+            <a href="{% url 'admin:index' %}" class="block px-4 py-2 text-sm text-dark-text hover:bg-gray-100">Admin</a>
+            {% endif %}
+            <a href="{% url 'my_page' %}" class="block px-4 py-2 text-sm text-dark-text hover:bg-gray-100">My Page</a>
+            <button id="openLogoutModal" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</button>
+          </div>
+        </div>
+        {% else %}
+        <div class="flex items-center gap-3">
+          <a href="{% url 'login' %}" class="text-sm text-primary-blue border border-primary-blue px-4 py-1.5 rounded-lg hover:bg-primary-blue hover:text-white transition">Masuk</a>
+          <a href="{% url 'register' %}" class="text-sm text-white bg-primary-blue px-4 py-1.5 rounded-lg hover:bg-sky-600 transition">Daftar</a>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="md:hidden">
+        <button id="mobile-menu-button" class="text-dark-text">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden mt-2">
+      {% if user.is_authenticated %}
+      <div class="flex items-center space-x-3 px-3 py-3 text-sm font-semibold text-dark-text border-b">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
+        </svg>
+        <span>Hallo, {{ user.get_full_name|default:user.username }}</span>
+      </div>
+      {% endif %}
+
+      <div class="py-2">
+        {% if user.is_authenticated %}
+        <a href="{% url 'my_page' %}" class="block py-2 px-3 text-sm text-dark-text hover:bg-primary-blue hover:text-white rounded">My Page</a>
+        {% endif %}
+        <a href="{% url 'home' %}" class="block py-2 px-3 text-sm text-dark-text hover:bg-primary-blue hover:text-white rounded">Beranda</a>
+        <a href="{% url 'galeri_review' %}" class="block py-2 px-3 text-sm text-dark-text hover:bg-primary-blue hover:text-white rounded">Galeri Review</a>
+        <a href="{% url 'submit_review' %}" class="block py-2 px-3 text-sm text-dark-text hover:bg-primary-blue hover:text-white rounded">Submit Review</a>
+        {% if user.is_authenticated %}
+        <button id="openLogoutModalMobile" class="block w-full text-left py-2 px-3 text-sm text-red-600 hover:bg-red-600 hover:text-white rounded">Log Out</button>
+        {% else %}
+        <div class="flex justify-between gap-2 px-3 mt-2">
+          <a href="{% url 'login' %}" class="flex-1 text-center py-2 text-sm border border-primary-blue text-primary-blue rounded hover:bg-primary-blue hover:text-white transition">Masuk</a>
+          <a href="{% url 'register' %}" class="flex-1 text-center py-2 text-sm bg-primary-blue text-white rounded hover:bg-sky-600 transition">Daftar</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Modal Logout -->
+<div id="logoutModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6 relative">
+    <button id="closeModalBtn" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <h2 class="text-lg font-semibold text-dark-text mb-3">Konfirmasi Logout</h2>
+    <p class="text-sm text-light-text mb-6">Apakah kamu yakin ingin keluar dari akun?</p>
+    <div class="flex justify-end gap-3">
+      <button id="cancelLogout" class="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded-lg">Batal</button>
+      <a href="{% url 'logout' %}" class="px-4 py-2 text-sm bg-red-600 text-white hover:bg-red-700 rounded-lg">Logout</a>
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+  // ========== USER DROPDOWN ==========
+  const menuBtn = document.getElementById("userMenuBtn");
+  const menu = document.getElementById("userMenu");
+
+  if (menuBtn && menu) {
+    menuBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      menu.classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!menu.contains(e.target) && !menuBtn.contains(e.target)) {
+        menu.classList.add("hidden");
+      }
+    });
+  }
+
+  // ========== LOGOUT MODAL ==========
+  const logoutModal = document.getElementById("logoutModal");
+  const openModalBtns = [document.getElementById("openLogoutModal"), document.getElementById("openLogoutModalMobile")];
+  const closeModalBtn = document.getElementById("closeModalBtn");
+  const cancelBtn = document.getElementById("cancelLogout");
+
+  openModalBtns.forEach((btn) => {
+    if (btn) {
+      btn.addEventListener("click", () => {
+        logoutModal.classList.remove("hidden");
+      });
+    }
+  });
+
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener("click", () => {
+      logoutModal.classList.add("hidden");
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+      logoutModal.classList.add("hidden");
+    });
+  }
+
+  if (logoutModal) {
+    logoutModal.addEventListener("click", function (e) {
+      if (e.target === logoutModal) {
+        logoutModal.classList.add("hidden");
+      }
+    });
+  }
+</script>
+{% endblock scripts %}

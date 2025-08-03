@@ -1,0 +1,287 @@
+{% extends 'layout/main.html' %}
+
+<!-- Load -->
+{% block title %} Submit Review {% endblock title %}
+
+<!-- Start Content -->
+{% block content %}
+
+<!-- Navbar -->
+{% include 'layout/navbar.html' %}
+
+<main class="py-12 px-6">
+  <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-xl p-8">
+    <h1 class="text-3xl font-bold text-dark-text mb-2 text-center">✍️ Submit Karya Review & Infografis</h1>
+    <p class="text-light-text text-center mb-8">Lengkapi formulir di bawah untuk mengirimkan hasil karyamu dalam program Sabu Sabu.</p>
+
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block mb-2 text-sm font-semibold text-dark-text">Judul Buku</label>
+          {{ form.judul_buku }}
+        </div>
+        <div>
+          <label class="block mb-2 text-sm font-semibold text-dark-text">Nama Penulis</label>
+          {{ form.penulis_buku }}
+        </div>
+      </div>
+
+      <!-- <div>
+        <label class="block mb-2 text-sm font-semibold text-dark-text">Upload Cover Buku</label>
+        <input type="file" id="coverBukuInput" name="cover_buku" accept="image/*" required />
+        <img id="coverBukuPreview" class="mt-3 max-h-48 rounded-lg" style="display: none" />
+        <p class="text-xs text-light-text mt-1">Gunakan gambar sampul buku asli untuk hasil terbaik.</p>
+      </div> -->
+
+      <div>
+        <label class="block mb-2 text-sm font-semibold text-dark-text">Upload Cover Buku</label>
+        <input
+          type="file"
+          id="coverBukuInput"
+          name="cover_buku"
+          accept="image/*"
+          class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-blue/10 file:text-primary-blue hover:file:bg-primary-blue/20"
+          required
+        />
+
+        <div id="coverBukuPreviewContainer" class="mt-4 hidden">
+          <div class="relative inline-block p-2 border-2 border-dashed border-gray-200 rounded-lg">
+            <img id="coverBukuPreview" class="max-h-48 w-auto rounded-md" src="" alt="Pratinjau Cover" />
+            <button type="button" id="removeCoverBuku" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold shadow-md hover:bg-red-700 transition-all">&times;</button>
+          </div>
+        </div>
+        <p class="text-xs text-light-text mt-1">Gunakan gambar sampul buku asli untuk hasil terbaik.</p>
+      </div>
+
+      <div>
+        <label class="block mb-2 text-sm font-semibold text-dark-text">Bulan Baca</label>
+        {{ form.bulan_baca }}
+      </div>
+
+      <div>
+        <label class="block mb-2 text-sm font-semibold text-dark-text">Isi Review (Wajib)</label>
+        {{ form.isi_review }}
+      </div>
+
+      <!-- Infografis -->
+      <!-- <div>
+        <label class="block mb-2 text-sm font-semibold text-dark-text">Upload Gambar Infografis </label>
+        <input type="file" id="infografisInput" name="gambar_infografis" accept="image/*" />
+        <img id="infografisPreview" class="mt-3 max-h-48 rounded-lg" style="display: none" />
+        <p class="text-xs text-light-text mt-1">File yang didukung: JPG, PNG. Ukuran maks: 2MB.</p>
+      </div> -->
+
+      <div>
+        <label class="block mb-2 text-sm font-semibold text-dark-text">Upload Gambar Infografis</label>
+        <input
+          type="file"
+          id="infografisInput"
+          name="gambar_infografis"
+          accept="image/*"
+          class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-blue/10 file:text-primary-blue hover:file:bg-primary-blue/20"
+        />
+
+        <div id="infografisPreviewContainer" class="mt-4 hidden">
+          <div class="relative inline-block p-2 border-2 border-dashed border-gray-200 rounded-lg">
+            <img id="infografisPreview" class="max-h-48 w-auto rounded-md" src="" alt="Pratinjau Infografis" />
+            <button type="button" id="removeInfografis" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold shadow-md hover:bg-red-700 transition-all">
+              &times;
+            </button>
+          </div>
+        </div>
+        <p class="text-xs text-light-text mt-1">File yang didukung: JPG, PNG. Ukuran maks: 2MB.</p>
+      </div>
+
+      <div>
+        <label class="block mb-2 text-sm font-semibold text-dark-text">Link Video YouTube </label>
+        {{ form.link_video }}
+      </div>
+
+      {% if form.errors %}
+      <div class="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm" role="alert">
+        <strong class="font-bold">Oops! Terjadi kesalahan:</strong>
+        <ul class="list-disc list-inside mt-2">
+          {% for field in form %} {% for error in field.errors %}
+          <li>{{ field.label }}: {{ error }}</li>
+          {% endfor %} {% endfor %} {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="pt-4">
+        <button type="submit" class="w-full bg-primary-blue text-white font-bold py-3 px-4 rounded-lg hover:bg-sky-600 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-blue">
+          Kirim Karyaku
+        </button>
+      </div>
+    </form>
+  </div>
+</main>
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js"></script>
+<!-- <script>
+  document.getElementById("coverBukuInput").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Ukuran gambar cover tidak boleh lebih dari 2MB.");
+      e.target.value = "";
+      return;
+    }
+
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      alert("File cover harus berupa gambar JPG atau PNG.");
+      e.target.value = "";
+      return;
+    }
+
+    const preview = document.getElementById("coverBukuPreview");
+
+    if (file.size < 300 * 1024) {
+      // ✅ Tidak perlu kompres
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+      return;
+    }
+
+    // ✅ Kompres gambar agar < 300KB (target)
+    new Compressor(file, {
+      quality: 0.5,
+      maxWidth: 800,
+      success(result) {
+        // ⚠️ Kita tidak bisa tahu pasti ukuran hasil kompres sebelum upload,
+        // tapi bisa periksa ukuran blob kalau perlu
+        const previewUrl = URL.createObjectURL(result);
+        preview.src = previewUrl;
+        preview.style.display = "block";
+
+        const dataTransfer = new DataTransfer();
+        const newFile = new File([result], file.name, { type: file.type });
+        dataTransfer.items.add(newFile);
+        e.target.files = dataTransfer.files;
+      },
+      error(err) {
+        console.error(err.message);
+      },
+    });
+  });
+
+  document.getElementById("infografisInput").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Ukuran gambar infografis tidak boleh lebih dari 2MB.");
+      e.target.value = "";
+      return;
+    }
+
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      alert("File infografis harus berupa gambar JPG atau PNG.");
+      e.target.value = "";
+      return;
+    }
+
+    const preview = document.getElementById("infografisPreview");
+
+    if (file.size < 300 * 1024) {
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+      return;
+    }
+
+    new Compressor(file, {
+      quality: 0.5,
+      maxWidth: 800,
+      success(result) {
+        preview.src = URL.createObjectURL(result);
+        preview.style.display = "block";
+
+        const dataTransfer = new DataTransfer();
+        const newFile = new File([result], file.name, { type: file.type });
+        dataTransfer.items.add(newFile);
+        e.target.files = dataTransfer.files;
+      },
+      error(err) {
+        console.error(err.message);
+      },
+    });
+  });
+</script> -->
+
+<script>
+  // Fungsi helper untuk menangani logika pratinjau dan kompresi
+  function setupImagePreview(inputId, previewContainerId, previewImgId, removeBtnId) {
+    const fileInput = document.getElementById(inputId);
+    const previewContainer = document.getElementById(previewContainerId);
+    const previewImage = document.getElementById(previewImgId);
+    const removeButton = document.getElementById(removeBtnId);
+
+    fileInput.addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Validasi ukuran dan tipe file
+      if (file.size > 2 * 1024 * 1024) {
+        alert(`Ukuran gambar tidak boleh lebih dari 2MB.`);
+        fileInput.value = ""; // Reset input
+        return;
+      }
+      if (!["image/jpeg", "image/png"].includes(file.type)) {
+        alert(`File harus berupa gambar JPG atau PNG.`);
+        fileInput.value = "";
+        return;
+      }
+
+      // Fungsi untuk menampilkan pratinjau
+      const showPreview = (fileObject) => {
+        const previewUrl = URL.createObjectURL(fileObject);
+        previewImage.src = previewUrl;
+        previewContainer.classList.remove("hidden");
+      };
+
+      // Kompres gambar jika ukurannya > 300KB
+      if (file.size > 300 * 1024) {
+        new Compressor(file, {
+          quality: 0.6,
+          maxWidth: 1024,
+          maxHeight: 1024,
+          success(result) {
+            showPreview(result);
+            // Ganti file di input dengan file hasil kompresi
+            const dataTransfer = new DataTransfer();
+            const newFile = new File([result], file.name, { type: result.type });
+            dataTransfer.items.add(newFile);
+            fileInput.files = dataTransfer.files;
+          },
+          error(err) {
+            console.error(err.message);
+            // Jika kompresi gagal, tetap tampilkan gambar asli
+            showPreview(file);
+          },
+        });
+      } else {
+        // Langsung tampilkan jika ukuran sudah kecil
+        showPreview(file);
+      }
+    });
+
+    // Event listener untuk tombol hapus
+    removeButton.addEventListener("click", function () {
+      fileInput.value = ""; // Mengosongkan file input
+      previewImage.src = ""; // Menghapus sumber gambar pratinjau
+      previewContainer.classList.add("hidden"); // Sembunyikan kontainer pratinjau
+    });
+  }
+
+  // Terapkan fungsi ke kedua input file
+  setupImagePreview("coverBukuInput", "coverBukuPreviewContainer", "coverBukuPreview", "removeCoverBuku");
+  setupImagePreview("infografisInput", "infografisPreviewContainer", "infografisPreview", "removeInfografis");
+</script>
+
+{% endblock scripts %} {% endblock content %}

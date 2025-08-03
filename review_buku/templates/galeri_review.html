@@ -1,0 +1,42 @@
+{% extends 'layout/main.html' %}
+
+<!-- Load -->
+{% block title %} Galeri Review {% endblock title %}
+
+<!-- Start Content -->
+{% block content %}
+
+<!-- Navbar -->
+{% include 'layout/navbar.html' %}
+<main class="min-h-screen py-12 px-6">
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-3xl font-bold text-center text-dark-text mb-10">📖 Galeri Review Buku</h1>
+    <div class="space-y-8">
+      {% for review in reviews %}
+      <div class="bg-white shadow-lg rounded-xl p-6">
+        <div class="flex flex-col-reverse md:flex-row md:gap-8 items-start">
+          <div class="flex-1 mt-6 md:mt-0">
+            <h3 class="text-xl font-bold text-dark-text">Review untuk "{{ review.judul_buku }}"</h3>
+            <p class="text-sm text-light-text mt-1">oleh <strong>{{ review.user.get_full_name|default:review.user.username }}</strong> pada {{ review.tanggal_submit|date:"d M Y" }}</p>
+            <p class="text-slate-700 leading-relaxed whitespace-pre-line mt-4">{{ review.isi_review }}</p>
+            <a href="#" class="inline-block mt-4 text-sm font-semibold text-primary-blue hover:underline">Baca review lengkap &rarr;</a>
+          </div>
+          <div class="w-1/2 mx-auto md:w-40 md:mx-0 flex-shrink-0">
+            {% if review.cover_buku %}
+            <img class="w-full rounded-md shadow-md" src="{{ review.cover_buku.url }}" alt="Cover buku {{ review.judul_buku }}" />
+            {% else %}
+            <div class="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-400 text-sm rounded-md">Tidak ada cover</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-12 text-center">
+      <a href="#" class="text-primary-blue font-semibold hover:underline text-sm">← Kembali ke Beranda</a>
+    </div>
+  </div>
+</main>
+
+{% endblock %}

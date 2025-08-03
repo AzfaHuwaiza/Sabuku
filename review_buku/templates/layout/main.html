@@ -1,0 +1,59 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="{% static 'images/hmsi.png' %}" />
+    <title>{% block title %} - SabuSabu {% endblock title %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "primary-blue": "#0ea5e9", // ✅ benar
+              "dark-text": "#1e293b",
+              "light-text": "#64748b",
+              "light-bg": "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+    {% block style %} {% endblock style %}
+  </head>
+  <body class="bg-light-bg font-sans">
+    <!-- Content -->
+    {% block content %} {% endblock %}
+
+    <!-- Scripts -->
+    {% block scripts %} {% endblock scripts %}
+
+    <!-- Scripts -->
+    <script>
+      const menuButton = document.getElementById("mobile-menu-button");
+      const mobileMenu = document.getElementById("mobile-menu");
+      menuButton.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+      });
+    </script>
+  </body>
+</html>
+{% if request.show_fill_name_modal %}
+<div id="nameModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-lg w-full max-w-md shadow-xl">
+    <h2 class="text-lg font-bold mb-3 text-dark-text">Lengkapi Profil Anda</h2>
+    <p class="text-sm text-light-text mb-4">Silakan isi nama lengkap Anda terlebih dahulu.</p>
+    <form method="POST" action="{% url 'isi_nama' %}">
+      {% csrf_token %}
+      <input type="text" name="full_name" required placeholder="Nama Lengkap" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-primary-blue" />
+      <button type="submit" class="w-full bg-primary-blue text-white py-2 rounded-lg font-semibold hover:bg-sky-600">Simpan</button>
+    </form>
+  </div>
+</div>
+<script>
+  document.body.style.overflow = "hidden"; // Biar ga scroll-scroll
+</script>
+{% endif %}
