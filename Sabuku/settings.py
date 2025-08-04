@@ -67,6 +67,7 @@ JAZZMIN_SETTINGS = {
     "site_header": "Sabuku HMSI",
     "site_brand": "Sabuku HMSI",
     "site_logo": "images/hmsi.png",  
+    "custom_css": "css/admin_custom.css",
     "site_url": "/",  
     "custom_links": {
         "auth": [

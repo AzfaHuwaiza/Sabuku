@@ -1,16 +1,9 @@
-{% extends 'layout/main.html' %}
+{% extends 'layout/main.html' %} {% block title %} Galeri Review - SabuSabu {% endblock title %} {% block content %} {% include 'layout/navbar.html' %}
 
-<!-- Load -->
-{% block title %} Galeri Review {% endblock title %}
-
-<!-- Start Content -->
-{% block content %}
-
-<!-- Navbar -->
-{% include 'layout/navbar.html' %}
 <main class="min-h-screen py-12 px-6">
   <div class="max-w-5xl mx-auto">
     <h1 class="text-3xl font-bold text-center text-dark-text mb-10">📖 Galeri Review Buku</h1>
+
     <div class="space-y-8">
       {% for review in reviews %}
       <div class="bg-white shadow-lg rounded-xl p-6">
@@ -18,9 +11,27 @@
           <div class="flex-1 mt-6 md:mt-0">
             <h3 class="text-xl font-bold text-dark-text">Review untuk "{{ review.judul_buku }}"</h3>
             <p class="text-sm text-light-text mt-1">oleh <strong>{{ review.user.get_full_name|default:review.user.username }}</strong> pada {{ review.tanggal_submit|date:"d M Y" }}</p>
-            <p class="text-slate-700 leading-relaxed whitespace-pre-line mt-4">{{ review.isi_review }}</p>
-            <a href="#" class="inline-block mt-4 text-sm font-semibold text-primary-blue hover:underline">Baca review lengkap &rarr;</a>
+
+            <div class="relative mt-4 max-h-28 overflow-hidden">
+              <p class="text-slate-700 leading-relaxed whitespace-pre-line">{{ review.isi_review }}</p>
+              <div class="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent"></div>
+            </div>
+
+            <button
+              class="open-detail-modal-btn inline-block mt-2 text-sm font-semibold text-primary-blue hover:underline"
+              data-judul="{{ review.judul_buku }}"
+              data-penulis-buku="{{ review.penulis_buku }}"
+              data-user="{{ review.user.get_full_name|default:review.user.username }}"
+              data-tanggal="{{ review.tanggal_submit|date:'d M Y' }}"
+              data-cover-url="{% if review.cover_buku %}{{ review.cover_buku.url }}{% endif %}"
+              data-isi="{{ review.isi_review }}"
+              data-video-url="{% if review.link_video %}{{ review.link_video }}{% endif %}"
+              data-infografis-url="{% if review.gambar_infografis %}{{ review.gambar_infografis.url }}{% endif %}"
+            >
+              Baca review lengkap &rarr;
+            </button>
           </div>
+
           <div class="w-1/2 mx-auto md:w-40 md:mx-0 flex-shrink-0">
             {% if review.cover_buku %}
             <img class="w-full rounded-md shadow-md" src="{{ review.cover_buku.url }}" alt="Cover buku {{ review.judul_buku }}" />
@@ -34,9 +45,143 @@
     </div>
 
     <div class="mt-12 text-center">
-      <a href="#" class="text-primary-blue font-semibold hover:underline text-sm">← Kembali ke Beranda</a>
+      <a href="{% url 'home' %}" class="text-primary-blue font-semibold hover:underline text-sm">← Kembali ke Beranda</a>
     </div>
   </div>
 </main>
 
-{% endblock %}
+<div id="reviewDetailModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50 p-4 transition-opacity duration-300">
+  <div id="modalContent" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl transform opacity-0 scale-95 transition-all duration-300 ease-out">
+    <div class="flex justify-between items-center p-4 border-b">
+      <h2 id="modal-judul" class="text-xl font-bold text-dark-text"></h2>
+      <button id="closeDetailModal" class="text-gray-400 hover:text-red-500 text-2xl font-bold transition">&times;</button>
+    </div>
+
+    <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+      <div class="flex items-center space-x-4">
+        <img id="modal-cover" src="" alt="Cover Buku" class="w-24 h-auto rounded-md shadow-sm" />
+        <div>
+          <p class="text-sm text-gray-600">Penulis Buku: <strong id="modal-penulis-buku"></strong></p>
+          <p class="text-sm text-gray-600 italic">Direview oleh <strong id="modal-user"></strong> pada <span id="modal-tanggal"></span></p>
+        </div>
+      </div>
+
+      <p id="modal-isi" class="text-slate-800 whitespace-pre-line leading-relaxed border-t pt-4"></p>
+
+      <div id="modal-video-container" class="border-t pt-4 hidden">
+        <p class="font-semibold mb-1">🎥 Video Review:</p>
+        <a id="modal-video-link" href="" target="_blank" class="text-primary-blue hover:underline text-sm break-all">Tonton di YouTube ↗</a>
+      </div>
+
+      <div id="modal-infografis-container" class="border-t pt-4 hidden">
+        <p class="font-semibold mb-2">🖼️ Infografis:</p>
+        <img id="modal-infografis" src="" alt="Infografis" class="w-full rounded-md shadow-md" />
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %} {% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("reviewDetailModal");
+    const modalContent = document.getElementById("modalContent");
+    const closeModalBtn = document.getElementById("closeDetailModal");
+    const openModalBtns = document.querySelectorAll(".open-detail-modal-btn");
+
+    // Element di dalam modal yang akan diisi data
+    const modalJudul = document.getElementById("modal-judul");
+    const modalPenulisBuku = document.getElementById("modal-penulis-buku");
+    const modalUser = document.getElementById("modal-user");
+    const modalTanggal = document.getElementById("modal-tanggal");
+    const modalCover = document.getElementById("modal-cover");
+    const modalIsi = document.getElementById("modal-isi");
+
+    const modalVideoContainer = document.getElementById("modal-video-container");
+    const modalVideoLink = document.getElementById("modal-video-link");
+
+    const modalInfografisContainer = document.getElementById("modal-infografis-container");
+    const modalInfografis = document.getElementById("modal-infografis");
+
+    // Fungsi untuk membuka modal
+    const openModal = (btn) => {
+      // Ambil data dari atribut data-* tombol yang diklik
+      const data = btn.dataset;
+
+      // Isi konten modal dengan data
+      modalJudul.textContent = data.judul;
+      modalPenulisBuku.textContent = data.penulisBuku;
+      modalUser.textContent = data.user;
+      modalTanggal.textContent = data.tanggal;
+      modalIsi.textContent = data.isi;
+
+      // Handle gambar cover
+      if (data.coverUrl) {
+        modalCover.src = data.coverUrl;
+        modalCover.style.display = "block";
+      } else {
+        modalCover.style.display = "none";
+      }
+
+      // Handle link video
+      if (data.videoUrl) {
+        modalVideoLink.href = data.videoUrl;
+        modalVideoContainer.style.display = "block";
+      } else {
+        modalVideoContainer.style.display = "none";
+      }
+
+      // Handle gambar infografis
+      if (data.infografisUrl) {
+        modalInfografis.src = data.infografisUrl;
+        modalInfografisContainer.style.display = "block";
+      } else {
+        modalInfografisContainer.style.display = "none";
+      }
+
+      // Tampilkan modal dengan animasi
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      document.body.classList.add("overflow-hidden");
+      setTimeout(() => {
+        modal.classList.add("opacity-100");
+        modalContent.classList.remove("opacity-0", "scale-95");
+        modalContent.classList.add("opacity-100", "scale-100");
+      }, 10);
+    };
+
+    // Fungsi untuk menutup modal
+    const closeModal = () => {
+      modalContent.classList.remove("opacity-100", "scale-100");
+      modalContent.classList.add("opacity-0", "scale-95");
+      modal.classList.remove("opacity-100");
+
+      setTimeout(() => {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        document.body.classList.remove("overflow-hidden");
+      }, 300);
+    };
+
+    // Tambahkan event listener ke setiap tombol "Baca review lengkap"
+    openModalBtns.forEach((btn) => {
+      btn.addEventListener("click", () => openModal(btn));
+    });
+
+    // Event listener untuk tombol close dan background overlay
+    closeModalBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    // Event listener untuk tombol 'Escape'
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+        closeModal();
+      }
+    });
+  });
+</script>
+{% endblock scripts %}

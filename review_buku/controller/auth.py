@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.views.decorators.http import require_POST
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.http import HttpResponse
@@ -38,7 +39,11 @@ def register_view(request):
             user.is_active = False  
             user.save()
 
-            send_verification_email(request, user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            domain = request.get_host()
+
+            send_activation_email(user, domain, uid, token)
             messages.success(request, 'Akun berhasil dibuat. Silakan cek email untuk verifikasi.')
 
             return redirect('login')
@@ -53,16 +58,33 @@ def register_view(request):
 def verifikasi_terkirim_view(request):
     return render(request, 'verifikasi_terkirim.html')
 
-def send_verification_email(request, user):
-    current_site = get_current_site(request)
+def send_activation_email(user, domain, uid, token):
     subject = 'Aktivasi Akun'
-    message = render_to_string('email_verifikasi.html', {
+    from_email = settings.EMAIL_HOST_USER
+    to_email = user.email
+
+    context = {
         'user': user,
-        'domain': current_site.domain,
-        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-        'token': default_token_generator.make_token(user),
-    })
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+        'domain': domain,
+        'uid': uid,
+        'token': token,
+    }
+
+    html_content = render_to_string('email_template/activation_email.html', context)
+    text_content = f"""
+Hai {user.username},
+
+Terima kasih sudah mendaftar.
+
+Silakan klik link berikut untuk mengaktifkan akunmu:
+http://{domain}/activate/{uid}/{token}/
+
+Jika kamu tidak merasa mendaftar, abaikan email ini.
+"""
+
+    msg = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
 
 def activate_account(request, uidb64, token):
     User = get_user_model()

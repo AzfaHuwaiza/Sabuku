@@ -1,0 +1,9 @@
+.login-page .brand-image {
+  display: none !important;
+}
+
+/* Opsional: hilangkan tulisan besar juga */
+.login-logo,
+.login-logo a {
+  display: none !important;
+}
