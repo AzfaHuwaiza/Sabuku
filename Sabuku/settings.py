@@ -66,7 +66,7 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "Selamat Datang di Panel Admin Sabuku",
     "site_header": "Sabuku HMSI",
     "site_brand": "Sabuku HMSI",
-    "site_logo": "images/hmsi.png",  
+    "site_logo": "images/sabuku_logo_ai.png",  
     "custom_css": "css/admin_custom.css",
     "site_url": "/",  
     "custom_links": {
@@ -105,6 +105,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'review_buku.context_processors.review_pending_count',
             ],
         },
     },
@@ -113,15 +114,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'Sabuku.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'sabuku_db',
+        'USER': 'sabuku',
+        'PASSWORD': 'sabukuhmsi',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
+
 
 
 # Password validation

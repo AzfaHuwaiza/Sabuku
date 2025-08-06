@@ -4,7 +4,8 @@
   <div class="container mx-auto px-6 py-3">
     <div class="flex justify-between items-center">
       <a href="{% url 'home' %}" class="flex items-center space-x-3">
-        <img src="{% static 'images/hmsi.png' %}" alt="Logo HMSI" class="w-12 h-auto" />
+        <img src="{% static 'images/hmsi.png' %}" alt="Logo HMSI" class="w-12 h-auto hidden md:block" />
+        <img src="{% static 'images/sabuku_logo_ai.png' %}" alt="Logo Sabuku" class="w-12 h-auto" />
         <div>
           <p class="text-xl font-bold text-dark-text">Sabuku</p>
           <p class="text-xs text-light-text">Satu Bulan, Satu Buku. HMSI</p>
@@ -19,20 +20,29 @@
         <div class="border-l h-6 border-gray-300"></div>
         <div class="relative">
           <!-- Trigger button -->
-          <button id="userMenuBtn" class="flex items-center space-x-2 text-dark-text hover:text-primary-blue transition">
+          <button id="userMenuBtn" class="flex items-center space-x-2 text-dark-text hover:text-primary-blue transition relative">
             <span class="text-sm font-medium"> {% with user.get_full_name|default:user.username as nama %} {{ nama|slice:":15" }}{% if nama|length > 15 %}...{% endif %} {% endwith %} </span>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd" />
             </svg>
+
+            {% if user.is_superuser and review_pending_count > 0 %}
+            <span class="absolute top-0 right-0 block w-2.5 h-2.5 bg-yellow-400 rounded-full ring-2 ring-white"></span>
+            {% endif %}
           </button>
 
           <!-- Dropdown menu -->
-          <div id="userMenu" class="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg hidden z-50">
+          <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg hidden z-50">
             {% if user.is_superuser %}
-            <a href="{% url 'admin:index' %}" class="block px-4 py-2 text-sm text-dark-text hover:bg-gray-100">Admin</a>
+            <a href="{% url 'admin_approval_page' %}" class="block px-4 py-2 text-sm text-dark-text hover:bg-gray-100">
+              Manajemen Review {% if review_pending_count > 0 %}
+              <span class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full"> {{ review_pending_count }} </span>
+              {% endif %}
+            </a>
+            <a href="{% url 'admin:index' %}" target="_blank" class="block px-4 py-2 text-sm text-dark-text hover:bg-gray-100">Admin Panel</a>
             {% endif %}
             <a href="{% url 'my_page' %}" class="block px-4 py-2 text-sm text-dark-text hover:bg-gray-100">My Page</a>
-            <button id="openLogoutModal" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</button>
+            <button id="openLogoutModal" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 font-bold">Logout</button>
           </div>
         </div>
         {% else %}
@@ -61,14 +71,21 @@
       {% endif %}
 
       <div class="py-2">
-        {% if user.is_authenticated %}
+        {% if user.is_superuser %}
+        <a href="{% url 'admin_approval_page' %}" class="block py-2 px-3 text-sm text-dark-text hover:bg-primary-blue hover:text-white rounded">
+          Manajemen Review {% if review_pending_count > 0 %}
+          <span class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-0.5 rounded-full"> {{ review_pending_count }} </span>
+          {% endif %}
+        </a>
+        <a href="{% url 'admin:index' %}" class="block py-2 px-3 text-sm text-dark-text hover:bg-primary-blue hover:text-white rounded">Admin Panel</a>
+        {% endif %} {% if user.is_authenticated %}
         <a href="{% url 'my_page' %}" class="block py-2 px-3 text-sm text-dark-text hover:bg-primary-blue hover:text-white rounded">My Page</a>
         {% endif %}
         <a href="{% url 'home' %}" class="block py-2 px-3 text-sm text-dark-text hover:bg-primary-blue hover:text-white rounded">Beranda</a>
         <a href="{% url 'galeri_review' %}" class="block py-2 px-3 text-sm text-dark-text hover:bg-primary-blue hover:text-white rounded">Galeri Review</a>
-        <a href="{% url 'submit_review' %}" class="block py-2 px-3 text-sm text-dark-text hover:bg-primary-blue hover:text-white rounded">Submit Review</a>
+        <a href="{% url 'submit_review' %}" class="block py-2 px-3 text-primary-blue text-sm text-dark-text hover:bg-primary-blue hover:text-white rounded font-bold">Submit Review</a>
         {% if user.is_authenticated %}
-        <button id="openLogoutModalMobile" class="block w-full text-left py-2 px-3 text-sm text-red-600 hover:bg-red-600 hover:text-white rounded">Log Out</button>
+        <button id="openLogoutModalMobile" class="block w-full text-left py-2 px-3 text-sm text-red-600 hover:bg-red-600 hover:text-white rounded font-bold">Log Out</button>
         {% else %}
         <div class="flex justify-between gap-2 px-3 mt-2">
           <a href="{% url 'login' %}" class="flex-1 text-center py-2 text-sm border border-primary-blue text-primary-blue rounded hover:bg-primary-blue hover:text-white transition">Masuk</a>
@@ -92,7 +109,7 @@
     <p class="text-sm text-light-text mb-6">Apakah kamu yakin ingin keluar dari akun?</p>
     <div class="flex justify-end gap-3">
       <button id="cancelLogout" class="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded-lg">Batal</button>
-      <a href="{% url 'logout' %}" class="px-4 py-2 text-sm bg-red-600 text-white hover:bg-red-700 rounded-lg">Logout</a>
+      <a href="{% url 'logout' %}" class="px-4 py-2 text-sm bg-red-600 text-white hover:bg-red-700 rounded-lg font-bold">Logout</a>
     </div>
   </div>
 </div>

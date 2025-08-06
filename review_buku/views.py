@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test 
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from .models import *
@@ -118,3 +118,46 @@ def isi_nama(request):
         request.user.save()
         return redirect(request.META.get('HTTP_REFERER', 'home'))
     return redirect('home')
+
+
+def superuser_required(view_func):
+    decorated_view_func = user_passes_test(
+        lambda u: u.is_authenticated and u.is_superuser,
+        login_url='login' # Ganti dengan URL login Anda jika berbeda
+    )(view_func)
+    return decorated_view_func
+
+
+@superuser_required # <- Ganti decorator ini
+def admin_approval_page(request):
+    status = request.GET.get('status', 'pending')
+
+    if status == 'approved':
+        reviews_list = Review.objects.filter(status_approve=True).order_by('-tanggal_submit')
+        active_tab = 'approved'
+    else:
+        reviews_list = Review.objects.filter(status_approve=False).order_by('-tanggal_submit')
+        active_tab = 'pending'
+
+    pending_count = Review.objects.filter(status_approve=False).count()
+
+    context = {
+        'reviews': reviews_list,
+        'active_tab': active_tab,
+        'pending_count': pending_count,
+    }
+    return render(request, 'admin_approval.html', context)
+
+
+@superuser_required # <- Ganti decorator ini
+def approve_review(request, review_id):
+    if request.method == 'POST':
+        review = get_object_or_404(Review, pk=review_id)
+        
+        review.status_approve = True
+        review.save()
+        
+        messages.success(request, f'Review untuk buku "{review.judul_buku}" telah disetujui.')
+        return redirect('admin_approval_page')
+    
+    return redirect('admin_approval_page')

@@ -17,4 +17,6 @@ urlpatterns = [
     path('edit-review/', edit_review, name='edit_review'),
     path('delete-review/', delete_review, name='delete_review'),
     path('isi-nama/', isi_nama, name='isi_nama'),
+    path('review-management/', admin_approval_page, name='admin_approval_page'),
+    path('review/approve/<int:review_id>/', approve_review, name='approve_review'),
 ]

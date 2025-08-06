@@ -1,0 +1,96 @@
+{% extends 'layout/main.html' %} {% block title %} Manajemen Review - Admin {% endblock title %} {% block content %} {% include 'layout/navbar.html' %}
+
+<main class="py-10 px-4 md:px-8 bg-slate-50 min-h-screen">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-dark-text">Manajemen Review</h1>
+      <p class="text-light-text mt-1">Setujui review yang telah dikirim oleh pengguna.</p>
+    </div>
+
+    <div class="border-b border-gray-200 mb-6">
+      <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+        <a
+          href="?status=pending"
+          class="{% if active_tab == 'pending' %}border-primary-blue text-primary-blue{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+        >
+          Menunggu Persetujuan
+          <!-- Count -->
+          {% if pending_count > 0 %}
+          <span class="ml-2 bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">{{ pending_count }}</span>
+          {% endif %}
+        </a>
+        <a
+          href="?status=approved"
+          class="{% if active_tab == 'approved' %}border-primary-blue text-primary-blue{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+        >
+          Sudah Disetujui
+        </a>
+      </nav>
+    </div>
+
+    <div class="space-y-6">
+      {% for review in reviews %}
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="p-6">
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="md:col-span-2 space-y-4">
+              <div>
+                <p class="text-sm text-light-text">Review untuk:</p>
+                <h3 class="text-2xl font-bold text-dark-text">{{ review.judul_buku }}</h3>
+                <p class="text-sm text-dark-text">oleh {{ review.penulis_buku }}</p>
+              </div>
+              <div class="text-sm text-light-text border-t pt-3">
+                Dikirim oleh: <strong>{{ review.nama_pengirim }}</strong> <br />
+                Pada: {{ review.tanggal_submit|date:"d F Y" }}
+              </div>
+              <div class="border-t pt-3">
+                <p class="font-semibold text-dark-text mb-2">Isi Review:</p>
+                <div class="text-slate-700 whitespace-pre-line leading-relaxed text-sm max-h-40 overflow-y-auto pr-2">{{ review.isi_review }}</div>
+              </div>
+            </div>
+
+            <div class="md:col-span-1 space-y-4">
+              <div>
+                <p class="font-semibold text-dark-text mb-2 text-sm">Cover Buku:</p>
+
+                <a href="{{ review.cover_buku.url }}" target="_blank">
+                  <img src="{{ review.cover_buku.url }}" alt="Cover" class="w-1/2 h-auto object-cover rounded-md shadow-md" />
+                </a>
+              </div>
+              <div>
+                {% if review.gambar_infografis %}
+                <p class="font-semibold text-dark-text mb-2 text-sm">Infografis:</p>
+                <a href="{{ review.gambar_infografis.url }}" target="_blank">
+                  <img src="{{ review.gambar_infografis.url }}" alt="Infografis" class="w-1/2 h-auto object-cover rounded-md shadow-md" />
+                </a>
+                {% endif %}
+              </div>
+              <div>
+                {% if review.gambar_infografis %}
+                <p class="font-semibold text-dark-text mb-2 text-sm">Video Review:</p>
+                <a href="{{ review.link_video }}" target="_blank" class="text-primary-blue hover:underline text-sm break-all">{{ review.link_video }}</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if not review.status_approve %}
+        <div class="bg-slate-50 px-6 py-4 flex justify-end items-center">
+          <form method="POST" action="{% url 'approve_review' review.id %}">
+            {% csrf_token %}
+            <button type="submit" class="px-4 py-2 text-sm bg-green-600 text-white hover:bg-green-700 rounded-lg font-semibold">Approve</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+      {% empty %}
+      <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+        <p class="text-light-text">Tidak ada review yang menunggu persetujuan.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</main>
+
+{% endblock content %}
